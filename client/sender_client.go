@@ -19,7 +19,7 @@ func sendMessage(message utils.Message) ([]byte,error) {
 	}
 	resp,err:=http.Post(URL+"/message","application/json",bytes.NewBuffer(jsondata))
 	if err!=nil {
-		return []byte("error in sending message"), err
+		return []byte("error in sending message"),err
 	}
 	defer resp.Body.Close()
 	return io.ReadAll(resp.Body)
@@ -36,15 +36,16 @@ func main() {
 		fmt.Println("Enter your name")
 		fmt.Scanln(&message.Name)
 		message.Time = uint32(time.Now().Unix())
+		message.Status=0;//sent
 
 		resp, err := sendMessage(message)
 		if err != nil {
-			fmt.Print(err)
+			fmt.Println("err: ",err)
 			fmt.Println((string)(resp))
-			return
+		} else{
+			fmt.Println("response: ",string(resp))
 		}
-		fmt.Println(string(resp))
-
+		
 		var continu string
 		fmt.Println("Do you want to continue sending messages? (y/n)")
 		fmt.Scanln(&continu)
