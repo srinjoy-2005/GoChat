@@ -3,12 +3,13 @@ package main
 import (
 	"encoding/json"
 	"fmt"
+	"gochat/utils"
+	"bytes"
 	"log"
 	"net/http"
-	"gochat/utils"
 )
 
-const server_URL ="http://localhost:3001"
+var server_URL string= "http://localhost:3001"
 
 func messageHandler(w http.ResponseWriter, r *http.Request) {
 	if r.Method == http.MethodPost {
@@ -20,13 +21,22 @@ func messageHandler(w http.ResponseWriter, r *http.Request) {
 		}
 		fmt.Printf("Received message: %#v\n", message)
 		w.WriteHeader(http.StatusOK)
-		w.Write([]byte("Message received successfully"))
+		w.Write([]byte("[Message received successfully],"))
+		message.Status=1;//received here
 
-		res, err := http.Post(server_URL, "application/json", r.Body)
+		jsonPayload, err := json.Marshal(message)
 		if err != nil {
-			http.Error(w, "Error forwarding message to server", http.StatusInternalServerError)
+			http.Error(w, "Failed to encode message", http.StatusInternalServerError)
 			return
 		}
+		res, err := http.Post(server_URL, "application/json", bytes.NewBuffer(jsonPayload))	
+		if err != nil || res.StatusCode != http.StatusOK {
+			w.Write([]byte("[Failed to send to main server]"))
+			log.Println("Error sending message to main server:", err)
+			return
+		}
+		log.Println(res.Header, res.Status)
+		w.Write([]byte("[Message sent to main server successfully]"))
 
 		defer res.Body.Close()
 
