@@ -41,11 +41,23 @@ func storeHandler(w http.ResponseWriter, r *http.Request) {
 	}
 }
 
+func receiveHandler(w http.ResponseWriter, r *http.Request) {
+	if (r.Method != http.MethodGet) {
+		log.Println("Invalid request method:", r.Method)
+		w.WriteHeader(http.StatusMethodNotAllowed)
+		w.Header().Set("Content-Type", "application/json")
+		w.Write([]byte(`{"status":"Invalid request method"}`))
+	}
+	FileStore.GetAll(utils.Message{})
+	w.WriteHeader(http.StatusOK)
+
+}
 func main(){
 	store.InitDB() 
 	defer store.DB.Close() 
 
-	http.HandleFunc("/", storeHandler)
+	http.HandleFunc("/store", storeHandler)
+	http.HandleFunc("/receive", receiveHandler)
 	log.Println("Starting server on :3001")
 	log.Fatal(http.ListenAndServe(server_URL, nil))	
 }
