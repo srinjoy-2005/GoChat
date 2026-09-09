@@ -22,19 +22,29 @@ func storeHandler(w http.ResponseWriter, r *http.Request) {
 		var message utils.Message
 		err := json.NewDecoder(r.Body).Decode(&message)
 		if err != nil {
-			http.Error(w, "Invalid request body", http.StatusBadRequest)
+			log.Println("Error decoding request body:", err)
+			w.WriteHeader(http.StatusBadRequest)
+			w.Header().Set("Content-Type", "application/json")
+			w.Write([]byte(`{"status":"Invalid request body"}`))
 			return
 		}
 		message.Status = 2 //received at server
 		FileStore.Store(message)
 		w.WriteHeader(http.StatusOK)
-		w.Write([]byte("[Message stored successfully]"))
+		w.Header().Set("Content-Type", "application/json")
+		w.Write([]byte(`{"status":"Message stored successfully"}`))
 	} else {
-		http.Error(w, "Invalid request method", http.StatusMethodNotAllowed)
+		log.Println("Invalid request method:", r.Method)
+		w.WriteHeader(http.StatusMethodNotAllowed)
+		w.Header().Set("Content-Type", "application/json")
+		w.Write([]byte(`{"status":"Invalid request method"}`))
 	}
 }
 
 func main(){
+	store.InitDB() 
+	defer store.DB.Close() 
+
 	http.HandleFunc("/", storeHandler)
 	log.Println("Starting server on :3001")
 	log.Fatal(http.ListenAndServe(server_URL, nil))	
