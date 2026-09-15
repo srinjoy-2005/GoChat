@@ -35,7 +35,7 @@ func messageHandler(w http.ResponseWriter, r *http.Request) {
 			log.Println("Error sending message to main server:", err)
 			return
 		}
-		log.Println(res.Header, res.Status)
+		log.Printf("headers: #v, status: #v \n", res.Header, res.Status)
 		w.Write([]byte("[Message sent to main server successfully]"))
 
 		defer res.Body.Close()

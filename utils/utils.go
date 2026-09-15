@@ -7,4 +7,9 @@ type Message struct {
 	Status int //0:sent, 1:received at proxy, 2:received at server
 }
 
+type AuthPacket struct{
+	Username string
+	Password string
+}
+
 
