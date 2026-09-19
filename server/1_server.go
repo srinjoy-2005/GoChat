@@ -2,10 +2,11 @@ package main
 
 import (
 	"encoding/json"
+	"fmt"
+	"gochat/server/store"
 	"gochat/utils"
 	"log"
 	"net/http"
-	"gochat/server/store"
 )
 
 var URL string = ":3001"
@@ -44,6 +45,22 @@ func (s *server) handleReceive (w http.ResponseWriter, r *http.Request){
 	w.WriteHeader(http.StatusOK)
 }
 
+func (s *server) handleOnline(w http.ResponseWriter, r *http.Request){
+	if r.Method != http.MethodGet {
+		log.Println("Invalid request method in online")
+		w.Header().Set("Content-Type", "application/json")
+		w.WriteHeader(http.StatusBadRequest)
+		w.Write([]byte(`{"status":"Invalid request method to online"}`))
+		return
+	}
+	size:=len(InMemoryTokenStore.tokens)
+	sizeStr := fmt.Sprintf("%d", size)
+	log.Println("online:", size)
+	w.Header().Set("Content-Type", "application/json")
+	w.WriteHeader(http.StatusOK)
+	w.Write([]byte(`{"status":"online users count: ` + (sizeStr) + `"}`))
+}
+
 
 
 func main(){
@@ -58,7 +75,7 @@ func main(){
 	s.router.HandleFunc("GET /receive", s.handleReceive)
 	s.router.HandleFunc("POST /signup", s.handleSignUp)
 	s.router.HandleFunc("POST /login", s.handleLogin)
-	
+	s.router.HandleFunc("GET /online", s.handleOnline)
 	log.Println("Starting server on :3001")
 
 	http.ListenAndServe(s.addr, s.router)

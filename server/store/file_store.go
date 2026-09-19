@@ -16,7 +16,6 @@ var DB *sql.DB
 func InitDB() {
 	var err error
 	
-	// PUT IT HERE INSIDE A FUNCTION: 
 	DB, err = sql.Open("sqlite", "./server/store/messages.db") //  Use = instead of := because DB is declared above
 	if err != nil {
 		log.Fatalf("Failed to open database: %v", err)

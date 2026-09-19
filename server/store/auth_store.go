@@ -26,7 +26,7 @@ func (f *FileAuth) Store(username, hashedPassword string) error{
 	return nil
 }
 
-func (f *FileAuth) GetByUsername(username string) (string, error) {
+func (f *FileAuth) GetPasswordByUsername(username string) (string, error) {
     var hash string
     err := DB.QueryRow(
         "SELECT password_hash FROM users WHERE username = ?",
@@ -39,3 +39,15 @@ func (f *FileAuth) GetByUsername(username string) (string, error) {
     return hash, nil
 }
 
+func (f *FileAuth) GetIDByUsername(username string) (int, error) {
+	var ID int
+	err := DB.QueryRow(
+		"SELECT id FROM users WHERE username = ?",
+		username,
+	).Scan(&ID)
+
+	if err != nil {
+		return -1, err
+	}
+	return ID, nil
+}

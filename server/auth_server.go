@@ -69,7 +69,7 @@ func (s *server) handleLogin(w http.ResponseWriter, r *http.Request) {
 		}
 		username := authPacket.Username
 		passwd := authPacket.Password
-		storedPasswd, err := FileAuth.GetByUsername(username)
+		storedPasswd, err := FileAuth.GetPasswordByUsername(username)
 		if err != nil {
 			log.Println("login err", err)
 			w.Header().Set("Content-Type", "application/json")
@@ -91,10 +91,28 @@ func (s *server) handleLogin(w http.ResponseWriter, r *http.Request) {
 		r2 := rand.Intn(1000000)
 		r3 := rand.Intn(1000000)
 		token:= (r1*r2*r3)%1000000000
+		tokenStr := fmt.Sprintf("%d", token)
+		id, err := FileAuth.GetIDByUsername(username)
+		if err != nil {
+			log.Println("login err", err)
+			w.Header().Set("Content-Type", "application/json")
+			w.WriteHeader(http.StatusInternalServerError)
+			w.Write([]byte(`{"status":"db error on getting user id"}`))
+			return
+		}
+
+		//store token in memory
+		InMemoryTokenStore.AddToken(tokenStr, id)
+
 		w.Header().Set("Content-Type", "application/json")
 		w.WriteHeader(http.StatusOK)
 		w.Write([]byte(`{"status":"login successful"}`))
-		w.Write([]byte(fmt.Sprintf(`{"token":"%d"}`, token)))
+		w.Write([]byte(`{"token":"` + tokenStr + `"}`))
 		return
 	}
 }
+
+func (s *server) validateToken(token string) bool {
+	return InMemoryTokenStore.ValidateToken(token)
+}
+	
