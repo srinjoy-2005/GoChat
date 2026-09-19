@@ -3,8 +3,8 @@ package main
 import (
 	"bytes"
 	"fmt"
-	"time"
 	"gochat/utils"
+	"time"
 )
 
 const URL = "http://localhost:8080"
@@ -12,33 +12,73 @@ const URL = "http://localhost:8080"
 func main() {
 	fmt.Println("Welcome to message client")
 
-	var username, password string
+	//auth loop
 	for {
-		fmt.Println("Enter username for signup:")
-		fmt.Scanln(&username)
-		if len(bytes.TrimSpace([]byte(username))) > 0 {
-			break
+		fmt.Println("1. Signup")
+		fmt.Println("2. Login")
+		fmt.Println("q. Exit")
+
+		var choice string
+		fmt.Scanln(&choice)
+		
+		var username, password string
+		// Get username/password
+		for {
+			fmt.Println("Enter username:")
+			fmt.Scanln(&username)
+
+			if len(bytes.TrimSpace([]byte(username))) > 0 {
+				break
+			}
+
+			fmt.Println("Username cannot be empty, try again.")
 		}
-		fmt.Println("Username cannot be empty, try again.")
-	}
+		for {
+			fmt.Println("Enter password:")
+			fmt.Scanln(&password)
 
-	for {
-		fmt.Println("Enter password:")
-		fmt.Scanln(&password)
-		if len(bytes.TrimSpace([]byte(password))) > 0 {
-			break
+			if len(bytes.TrimSpace([]byte(password))) > 0 {
+				break
+			}
+
+			fmt.Println("Password cannot be empty, try again.")
 		}
-		fmt.Println("Password cannot be empty, try again.")
+
+		authPacket := AuthPacket{
+			username,
+			password,
+		}
+
+
+		if choice == "1" {
+			err := sendSignUp(authPacket)
+			if err != nil{
+				fmt.Println("Signup failed:", err)
+				continue
+			}
+
+			fmt.Println("Signup successful!")
+
+		} else if choice == "2" {
+			token, err := sendLogin(authPacket)
+			if err != nil {
+				fmt.Println("Login failed:", err)
+				continue
+			}
+
+			fmt.Println("Login successful!")
+			fmt.Println("Token:", token)
+
+			// Now enter messaging loop
+			break
+
+		} else if choice == "q" {
+			return
+		}
 	}
 
-	var authPacket AuthPacket
-	authPacket = AuthPacket{username, password}
-	err := sendSignUp(authPacket)
-	if err != nil {
-		fmt.Println("Signup network error:", err)
-		return
-	}
 
+	//messaging loop
 	ans:=true
 	var message utils.Message
 	for ans==true{

@@ -7,6 +7,7 @@ import (
 
 type Auth interface{
 	Store (username, password string) error
+	GetByUsername (username string) (string, error)
 }
 
 //implements Auth
@@ -23,5 +24,18 @@ func (f *FileAuth) Store(username, hashedPassword string) error{
 	}
 	log.Println("stored in auth")
 	return nil
+}
+
+func (f *FileAuth) GetByUsername(username string) (string, error) {
+    var hash string
+    err := DB.QueryRow(
+        "SELECT password_hash FROM users WHERE username = ?",
+        username,
+    ).Scan(&hash)
+	
+    if err != nil {
+        return "", err
+    }
+    return hash, nil
 }
 

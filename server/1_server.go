@@ -57,6 +57,7 @@ func main(){
 	s.router.HandleFunc("POST /store", s.handleStore)
 	s.router.HandleFunc("GET /receive", s.handleReceive)
 	s.router.HandleFunc("POST /signup", s.handleSignUp)
+	s.router.HandleFunc("POST /login", s.handleLogin)
 	
 	log.Println("Starting server on :3001")
 

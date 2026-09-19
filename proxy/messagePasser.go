@@ -1,10 +1,11 @@
 package main
 
 import (
+	"bytes"
 	"encoding/json"
 	"fmt"
 	"gochat/utils"
-	"bytes"
+	"io"
 	"log"
 	"net/http"
 )
@@ -35,7 +36,7 @@ func messageHandler(w http.ResponseWriter, r *http.Request) {
 			log.Println("Error sending message to main server:", err)
 			return
 		}
-		log.Printf("headers: #v, status: #v \n", res.Header, res.Status)
+		log.Printf("headers: %v, status: %v \n", res.Header, res.Status)
 		w.Write([]byte("[Message sent to main server successfully]"))
 
 		defer res.Body.Close()
@@ -53,6 +54,7 @@ func receiveHandler(w http.ResponseWriter, r *http.Request) {
 	}
 	res, err := http.Get(server_URL+"/receive")
 	if (err != nil || res.StatusCode != http.StatusOK) {
+		w.WriteHeader(http.StatusInternalServerError)
 		w.Write([]byte("[Failed to get messages from main server]"))
 		log.Println("Error getting messages from main server:", err)
 		return
@@ -69,6 +71,7 @@ func signupHandler(w http.ResponseWriter, r *http.Request){
 	}
 	res, err := http.Post(server_URL+"/signup", "application/json", r.Body)
 	if (err != nil || res.StatusCode != http.StatusOK) {
+		w.WriteHeader(http.StatusNotAcceptable)
 		w.Write([]byte("[Failed to signup with main server]"))
 		log.Println("Error signing up with main server:", err)
 		return
@@ -84,6 +87,24 @@ func loginHandler(w http.ResponseWriter, r *http.Request){
 		http.Error(w, "Invalid request method", http.StatusMethodNotAllowed)
 		return
 	}
+	res,err := http.Post(server_URL+"/login", "application/json", r.Body)
+	if (err != nil || res.StatusCode != http.StatusOK) {
+		w.WriteHeader(http.StatusNotAcceptable)
+		w.Write([]byte("[Failed to login with main server]"))
+		log.Println("Error logging in with main server:", err)
+		return
+	}
+	defer res.Body.Close()
+	log.Println("Logged in successfully")
+	token, err := io.ReadAll(res.Body)
+	if err != nil {
+		log.Println("Error reading login response:", err)
+		w.WriteHeader(http.StatusInternalServerError)
+		w.Write([]byte("[Failed to read login response]"))
+		return
+	}
+	w.WriteHeader(http.StatusOK)
+	w.Write([]byte(token))
 }
 
 func main(){
