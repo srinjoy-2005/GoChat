@@ -62,10 +62,37 @@ func receiveHandler(w http.ResponseWriter, r *http.Request) {
 	w.Write([]byte("[hit /receive ]"))
 }
 
+func signupHandler(w http.ResponseWriter, r *http.Request){
+	if r.Method != http.MethodPost {
+		http.Error(w, "Invalid request method", http.StatusMethodNotAllowed)
+		return
+	}
+	res, err := http.Post(server_URL+"/signup", "application/json", r.Body)
+	if (err != nil || res.StatusCode != http.StatusOK) {
+		w.Write([]byte("[Failed to signup with main server]"))
+		log.Println("Error signing up with main server:", err)
+		return
+	}
+	defer res.Body.Close()
+	log.Println("Signed up successfully")
+	w.WriteHeader(http.StatusOK)
+	w.Write([]byte("[Signed up with main server successfully]"))
+}
+
+func loginHandler(w http.ResponseWriter, r *http.Request){
+	if r.Method != http.MethodPost {
+		http.Error(w, "Invalid request method", http.StatusMethodNotAllowed)
+		return
+	}
+}
+
 func main(){
 	http.HandleFunc("/message",messageHandler)
 	http.HandleFunc("/receive",receiveHandler)
-	log.Println("Starting server on :8080")
 
+	http.HandleFunc("/signup",signupHandler)
+	http.HandleFunc("/login",loginHandler)
+
+	log.Println("Starting server on :8080")
 	log.Fatal(http.ListenAndServe("localhost:8080", nil))
 }

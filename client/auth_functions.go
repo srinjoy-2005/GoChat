@@ -4,9 +4,10 @@ import (
 	"bytes"
 	"encoding/json"
 	"fmt"
+	"gochat/utils"
+	"io"
 	"log"
 	"net/http"
-	"gochat/utils"
 )
 
 type AuthPacket utils.AuthPacket
@@ -18,10 +19,16 @@ func sendSignUp (authPacket AuthPacket) error{
 	}
 	resp, err := http.Post(URL+"/signup", "application/json", bytes.NewBuffer(jsondata))
 	if err!=nil || resp.StatusCode != http.StatusOK{
-		log.Printf("#v\n", err)
+		log.Printf("#+v \n", err)
 		fmt.Println("Error signing up!")
 	}
+	defer resp.Body.Close()
+	body, err := io.ReadAll(resp.Body)
+	if err != nil {
+		return err
+	}
 
+	fmt.Println(string(body))
 	return nil
 }
 

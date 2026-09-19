@@ -34,7 +34,7 @@ func InitDB() {
         content text,
         status integer
     );`
-    _, err = DB.Exec(messagesQuery)
+	_, err = DB.Exec(messagesQuery)
     if err != nil {
         log.Fatalf("Failed to create messages table: %v", err)
     }
@@ -45,6 +45,7 @@ func InitDB() {
         username text unique not null,
         password_hash text not null
     );`
+
     _, err = DB.Exec(usersQuery)
     if err != nil {
         log.Fatalf("Failed to create users table: %v", err)

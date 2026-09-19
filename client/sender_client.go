@@ -69,7 +69,7 @@ func main() {
 		resp, err := sendMessage(message)
 		if err != nil {
 			fmt.Println("err: ",err)
-			fmt.Println((string)(resp))
+			fmt.Println(string(resp))
 		} else{
 			fmt.Println("response: ",string(resp))
 		}

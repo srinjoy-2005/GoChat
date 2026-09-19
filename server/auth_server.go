@@ -45,7 +45,7 @@ func (s *server) handleSignUp(w http.ResponseWriter, r *http.Request){
 		}
 		log.Println("Signed Up")
 		w.Header().Set("Content-Type", "application/json")
-		w.WriteHeader(http.StatusInternalServerError)
+		w.WriteHeader(http.StatusOK)
 		w.Write([]byte(`{"status":"signup successful"}`))
 		return
 	}

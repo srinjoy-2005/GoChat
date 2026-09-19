@@ -6,7 +6,6 @@ import (
 	"log"
 	"net/http"
 	"gochat/server/store"
-	"gochat/server/auth_server"
 )
 
 var URL string = ":3001"

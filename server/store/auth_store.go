@@ -21,7 +21,7 @@ func (f *FileAuth) Store(username, hashedPassword string) error{
 	if (err!=nil){
 		return err
 	}
-	log.Println("Error storing in auth")
+	log.Println("stored in auth")
 	return nil
 }
 
